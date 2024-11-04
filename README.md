@@ -238,28 +238,9 @@ useEffect(() => {
 #### useUser
 Hook to access user data in your components.
 
-##### Returns:
+#####Returns:
 - user: The authenticated user object or null.
 - loading: Boolean indicating if the user data is still being loaded.
-- Example Configuration
-Directory Structure
-bash
-your-project/
-├── .env
-├── auth.options.json
-├── auth.schema.json
-├── package.json
-└── src/
-    ├── db/
-    │   └── mongodb.ts
-    ├── middleware/
-    │   └── universalAuthMiddleware.ts
-    ├── auth/
-    │   ├── getUser.ts
-    │   ├── registerUser.ts
-    │   └── loginUser.ts
-    ├── context/
-    │   └── UserContext.tsx
-    └── index.ts
-Contributing
+
+# Contributing
 Contributions are welcome! Please open an issue or a pull request.
