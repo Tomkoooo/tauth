@@ -1,0 +1,33 @@
+{
+  "name": "tauth",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["auth", "typescript", "react", "next", "express", "mongodb", "nodemailer"],
+  "author": "Tomkoooo",
+  "license": "MIT",  
+  "description": "A TypeScript-based authentication package for React and Next.js applications using Express and MongoDB.",
+  "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/express": "^5.0.0",
+    "@types/jsonwebtoken": "^9.0.7",
+    "@types/mongodb": "^4.0.7",
+    "@types/node": "^22.8.7",
+    "@types/nodemailer": "^6.4.16",
+    "@types/react": "^18.3.12",
+    "typescript": "^5.6.3"
+  },
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "bcryptjs": "^2.4.3",
+    "express": "^4.21.1",
+    "jsonwebtoken": "^9.0.2",
+    "mongodb": "^6.10.0",
+    "next": "^15.0.2",
+    "nodemailer": "^6.9.16",
+    "react": "^18.3.1"
+  }
+}
