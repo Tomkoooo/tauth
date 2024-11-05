@@ -32,7 +32,7 @@ This package provides a robust authentication system for applications built with
 To install the package, run:
 
 ```bash
-npm install your-package-name
+npm install @tomkoooo/t-auth
 ```
 
 ## Environment Variables
@@ -57,7 +57,7 @@ Create an auth.options.json file in your project root to configure email options
   }
 }
 ```
-# Usage
+# Usage
 
 ### Server Side (Express/Next.js)
 Setting Up Middleware
@@ -66,7 +66,7 @@ To use the authentication middleware, import and use it in your server applicati
 ```javascript
 // In your Express app
 import express from 'express';
-import { universalAuthMiddleware } from 'your-package-name';
+import { universalAuthMiddleware } from '@tomkoooo/t-auth';
 
 const app = express();
 app.use(express.json());
@@ -81,7 +81,7 @@ app.post('/reset-password', resetPassword);
 
 ```javascript
 // In your Next.js API route
-import { universalAuthMiddleware } from 'your-package-name';
+import { universalAuthMiddleware } from '@tomkoooo/t-auth';
 
 export default async function handler(req, res) {
   await universalAuthMiddleware(req, res, () => {
@@ -91,13 +91,14 @@ export default async function handler(req, res) {
 }
 ```
 ### Client Side (React Context)
-To manage user state in your React application, use the provided context.
+
+- To manage user state in your React application, use the provided context.
 
 Setting Up User Context
 Wrap your application with the UserProvider to manage user authentication state:
 
 ```javascript
-import { UserProvider } from 'your-package-name';
+import { UserProvider } from '@tomkoooo/t-auth';
 
 function MyApp({ Component, pageProps }) {
   return (
@@ -111,7 +112,7 @@ function MyApp({ Component, pageProps }) {
 You can access user data anywhere in your components:
 
 ```javascript
-import { useUser } from 'your-package-name';
+import { useUser } from '@tomkoooo/t-auth';
 
 const MyComponent = () => {
   const { user, loading } = useUser();
@@ -122,11 +123,13 @@ const MyComponent = () => {
 };
 ```
 # API Reference
+
 ### Middleware
 - universalAuthMiddleware
 Handles user authentication for routes. Attaches the user object to the request if authenticated.
 
 #### Usage: Call as middleware in your server (Express/Next.js).
+
 #### Authentication Functions
 - registerUser
 Registers a new user in the database.
@@ -151,7 +154,7 @@ Registers a new user in the database.
 
 #### - User Context
 
-API Endpoint for Fetching User
+##### API Endpoint for Fetching User
 To allow the client-side application to fetch the authenticated user's information, you need to create an API endpoint that utilizes the authentication middleware. This endpoint will check if the user is authenticated and return the user's data if they are.
 
 - Creating the API Endpoint
@@ -162,7 +165,7 @@ In your Express or Next.js application, create a new API route that uses the uni
 ```javascript
 // For an Express application
 import express from 'express';
-import { universalAuthMiddleware } from 'your-package-name';
+import { universalAuthMiddleware } from '@tomkoooo/t-auth';
 
 const app = express();
 
@@ -183,7 +186,7 @@ app.get('/api/user', (req, res) => {
 ```javascript
 
 // For a Next.js application
-import { universalAuthMiddleware } from 'your-package-name';
+import { universalAuthMiddleware } from '@tomkoooo/t-auth';
 
 export default async function handler(req, res) {
   await universalAuthMiddleware(req, res, () => {
@@ -238,9 +241,10 @@ useEffect(() => {
 #### useUser
 Hook to access user data in your components.
 
-#####Returns:
+##### Returns:
 - user: The authenticated user object or null.
 - loading: Boolean indicating if the user data is still being loaded.
 
 # Contributing
 Contributions are welcome! Please open an issue or a pull request.
+github.com/Tomkoooo
