@@ -66,14 +66,14 @@ const transporter = nodemailer.createTransport({
 ## Settings
 
 There is 3 settings file for the package:
-- [auth.options.json](#general-options)
-- [auth.schema.json](#schema-options)
-- [auth.routes.json](#router-options)
+- [auth.options.json](#general-settings)
+- [auth.schema.json](#schema-settings)
+- [auth.routes.json](#router-settings)
 
 Neither of them is necessary there is provided default settings.
 ***If you using them you need to create them on the root level of your project with the given name.***
 
-### General options
+### General Settings
 
 ```json
 {
@@ -92,7 +92,7 @@ Neither of them is necessary there is provided default settings.
 - ***EmailTemplate:*** 
     - Email content for email verifcation/password reset as html, {{code}} is where the verification code will be placed
 
-### Schema configuration in auth.schema.json
+### Schema Settings
 
 Default schema used in 'users' collection:
 ```javascript
@@ -112,7 +112,7 @@ const defaultUserSchema = {
 
 - In the file you can expand this schema by adding additional jsons, the two file combined will add the schema for the collection
 
-### Route settings in auth.routes.json
+### Router settings
 You can create public/private routes in a json file by implamenting this structure:
 
 ```json
@@ -144,6 +144,7 @@ You can define specific routes in the routes configuration object, specifying wh
 This setup provides flexible control over route access based on user status and roles, making it easier to enforce security and access levels across your app.
 
 # Authentication Process:
+
 This package uses ***JWT (JSON Web Tokens)*** to authenticate users. When a user logs in, the JWT is generated and paired with their IP address to create a unique hash. This process provides an added layer of security by linking the token to both the user and their device.
 
 - **How it works:**
@@ -168,9 +169,11 @@ In summary, this authentication approach ensures high security by preventing tok
 
 
 ## Provided Server-Side Async Functions
+
 The package includes pre-written, server-side async functions for various authentication tasks:
 
 ##### - getUser(token)
+
  - **Parameter:** token - client-side stored JWT (valid for 24 hours).
  - **Returns:** The user object.
 
@@ -193,10 +196,12 @@ The package includes pre-written, server-side async functions for various authen
     - Registration successful" if no email verification is needed.
 
 ##### - logout(email)
+
 - **Paramater:** email - the user's email.
 - **Returns:** { success: true | false, message: 'The user logged out.' }
 
 ##### - requestPasswordReset(email)
+
 - **Parameter:** email - the user’s email.
 - **Returns:** { success: true | false, message: 'An email with a reset code (stored in the database) is sent to the user.' }
 
@@ -352,7 +357,6 @@ export default router;
 ```
 
 ### User Context
-
 By default the context does not include any data for the user, but it gives the ability to set the user object. By this approach is easier to implament into any rendering, and framework.
 
 #### App router
