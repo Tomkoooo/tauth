@@ -181,7 +181,7 @@ for example here is the request password reset endpoint:
 import { requestResetPasswordAppRoute } from '@tomkoooo/t-auth';
 
 export async function POST(req) {
-  return requestPasswordReset(req);
+  return requestPasswordResetAppRoute(req);
 }
 
 ```
@@ -217,11 +217,11 @@ To use these pre-written API endpoint functions we need to create the correspond
 for example here is the request password reset endpoint:
 
 ```javascript
-// app/api/auth/forgot-password/route.ts
-import { requestResetPasswordAppRoute } from '@tomkoooo/t-auth';
+// pages/api/auth/forgot-password.ts (or .js)
+import { requestResetPasswordPagesRoute } from '@tomkoooo/t-auth'; // Importing the handler
 
-export async function POST(req) {
-  return requestPasswordReset(req);
+export default async function POST(req, res) {
+  return requestResetPasswordPagesRoute(req, res); // Call the handler
 }
 
 ```
