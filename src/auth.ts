@@ -44,6 +44,17 @@ export async function registerUser(email: string, password: string) {
   return { user: newUser, success: true, message: 'Registration successful'}
 }
 
+export async function logout(email:string){
+    const db = await connectToDatabase();
+    const users = db.collection('users');
+    const user = await users.findOne({email: email});
+    if(!user){
+        return {success: false, message: 'User not found'};
+    }
+    await users.updateOne({email: email}, {$set: {'codes.token': ''}});
+    return {success: true, message: 'User logged out successfully'};
+}
+
 export async function loginUser(identifier: string, password: string) {
     const db = await connectToDatabase();
     const hashedPassword = await bcrypt.hash(password, 10);

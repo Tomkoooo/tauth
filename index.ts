@@ -9,6 +9,7 @@ export { registerUser } from './src/auth';
 export { loginUser } from './src/auth'; // Assuming you have a loginUser function
 export { sendVerificationEmail } from './src/emailService/emailService'; // Assuming you have this function
 export { resetPassword } from './src/auth'; // Assuming you have this function
+export { logout } from './src/auth'; // Assuming you have this function
 
 // Exporting MongoDB connection
 export { connectToDatabase } from './src/db/mongodb';
