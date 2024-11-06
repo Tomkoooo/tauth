@@ -7,6 +7,7 @@ import { getUser } from '../auth'; // If you need this for other operations
 interface UserContextType {
   user: User | null;
   loading: boolean;
+  setUser: React.Dispatch<React.SetStateAction<User | null>>;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -17,9 +18,11 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     const fetchUser = async () => {
+      const token = localStorage.getItem('token');
       try {
         const response = await fetch('/api/user', {
           method: 'GET',
+          headers: {authorization: `Bearer ${token}`},
           credentials: 'include', // Ensure cookies are sent if needed
         });
         if (response.ok) {
@@ -40,7 +43,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   return (
-    <UserContext.Provider value={{ user, loading }}>
+    <UserContext.Provider value={{ user, loading, setUser }}>
       {children}
     </UserContext.Provider>
   );

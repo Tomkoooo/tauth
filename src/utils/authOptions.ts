@@ -6,5 +6,5 @@ export function loadAuthOptions() {
     if (fs.existsSync(optionsPath)) {
       return JSON.parse(fs.readFileSync(optionsPath, 'utf-8'));
     }
-    return { requireEmailVerification: false, passwordReset: false };
+    return { requireEmailVerification: false, passwordReset: false,  authMethod: "email"};
   }
