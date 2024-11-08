@@ -44,15 +44,18 @@ npm install @tomkoooo/t-auth@latest
 
 Add the following to your `.env` file:
 
+- Default JWT_SECRET is 'your_secret_key'
+- Default JWT_EXPIRES_IN is '24h'
 ```env
-JWT_SECRET=your_secret_key
-MONGO_URI=your_mongo_database_uri
-MONGO_DB_NAME=your_database_name
-SMTP_HOST=your_email_service
-SMTP_USER=your_email_username
-SMTP_PASS=your_email_password
-SMTP_PORT=your_smtp_port
-SMTP_SECURE=secure_setting_for_smtp
+JWT_SECRET      = your_secret_key
+JWT_EXPIRES_IN  = your_jwt_exparation_time
+MONGO_URI       = your_mongo_database_uri
+MONGO_DB_NAME   = your_database_name
+SMTP_HOST       = your_email_service
+SMTP_USER       = your_email_username
+SMTP_PASS       = your_email_password
+SMTP_PORT       = your_smtp_port
+SMTP_SECURE     = secure_setting_for_smtp
 ```
 
 ### Email Service Environment Variables
@@ -187,8 +190,8 @@ This package exports the following asynchronous serverless functions:
 - **connectToDatabase()** - Establishes a connection to MongoDB.
 
 #### Utility Functions
-- **generateToken(userId, clientIp)** - Creates a JWT based on user ID and client IP.
-- **validateToken(token, clientIp?)** - Validates a JWT with IP that are either provided or not. The functions call a `getClientIp()` function to get the ip for the pairing
+- **generateToken(userId, clientIp)** - Creates a JWT based on user ID and client IP. Returns the token for the database, hashed client ip and the hashed user id.
+- **validateToken(token, clientIp?)** - Validates a JWT with IP that are either provided or not. The function will call a `getClientIp()` to get the ip for the pairing
 
 #### Email Options
 - **emailOptions()** - Returns email HTML template and subject from `auth.options.json`.
@@ -197,11 +200,11 @@ This package exports the following asynchronous serverless functions:
 - **routesOptions()** - Returns route configuration from `auth.routes.json`.
 
 #### Verification Code
-- **generateVerificationCode(userId, verificationMethod)** - Generates a verification code for a specified method. (verification, reset) Returns the token for the databse, hashed client ip and the hashed user id.
+- **generateVerificationCode(userId, verificationMethod)** - Generates a verification code for a specified method. (verification, reset, etc...). It will pair the code at `user.codes[verificationMethod]`. Returns the verification code.
 
 #### Email Service
 - **sendMail(to, subject, html?, text?)** - Sends an email.
-- **sendVerificationEmail(to, code)** - Sends an email with a verification code.
+- **sendVerificationEmail(to, code)** - Sends an email with a verification code and uses `emailOptions()` for the subject and body.
 
 #### Authentication Functions
 - **registerUser(email, password)** - Registers a user. Returns `{success, user, token, message}` the token is needed for the `getUser()` function and it needs to be sotred in the cookies.
@@ -209,7 +212,7 @@ This package exports the following asynchronous serverless functions:
 - **getUser(token, ip?)** - Fetches user details with the [authentication](#authentication-process) process.
 
 #### Verification Functions
-- **verifyEmail(token, verificationCode)** - Verifies an email using a token and code.
+- **verifyEmail(email, verificationCode)** - Verifies an email using the email and the paired code.
 - **resetPassword(email, resetCode, newPassword)** - Resets the user password.
 - **requestPasswordReset(email)** - Initiates a password reset.
 - **resendVerificationEmail(email)** - Resends the verification email.
@@ -416,4 +419,4 @@ import {User} from '@tomkoooo/t-auth'
 ## Contributing
 
 Please submit issues or feature requests for improvements.
-[githib.com/Tomkoooo/tauth](#https://github.com/Tomkoooo/tauth)
+[github.com/Tomkoooo/tauth](https://github.com/Tomkoooo/tauth)
