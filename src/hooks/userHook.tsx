@@ -1,7 +1,9 @@
-// src/context/UserContext.tsx
+// src/hooks/userHooktsx
+
+'use client'
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { User } from '../types/userSchema'; // Assuming you have the User type defined
+import { User } from '../types/user'; // Assuming you have the User type defined
 
 interface UserContextType {
   user: User | null;

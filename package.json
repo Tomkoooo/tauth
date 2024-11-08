@@ -1,8 +1,14 @@
 {
   "name": "@tomkoooo/t-auth",
-  "version": "2.1.0",
-  "main": "index.ts",
+  "version": "2.2.0",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "files": [
+      "dist"
+  ],
   "scripts": {
+    "build": "tsup",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -12,11 +18,19 @@
     "next",
     "express",
     "mongodb",
-    "nodemailer"
+    "nodemailer",
+    "jwt",
+    "bcrypt",
+    "component",
+    "frontend",
+    "backend",
+    "fullstack",
+    "authentication",
+    "ui"
   ],
   "author": "Tomkoooo",
   "license": "MIT",
-  "description": "A TypeScript-based authentication package for React and Next.js applications using Express and MongoDB.",
+  "description": "A TypeScript-based authentication and mailer package for React and Next.js applications using Express and MongoDB.",
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",
     "@types/bcryptjs": "^2.4.6",
@@ -26,7 +40,7 @@
     "@types/node": "^22.8.7",
     "@types/nodemailer": "^6.4.16",
     "@types/react": "^18.3.12",
-    "typescript": "^5.6.3"
+    "tsup": "^8.3.5"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",

@@ -1,6 +1,9 @@
+
 # Authentication Package for Express and Next.js
 
-This package provides a robust authentication system for applications built with Express and Next.js. It supports user registration, login, email verification, password resets, and user state management through React Context.
+Fixed the issues with version 2.2.
+
+This package offers a flexible authentication system suitable for applications built with Express and Next.js, providing serverless function exports for user registration, login, email verification, password reset, and user management through React Context.
 
 ## Table of Contents
 
@@ -9,53 +12,58 @@ This package provides a robust authentication system for applications built with
 - [Environment Variables](#environment-variables)
 - [Settings](#settings)
 - [Authentication Process](#authentication-process)
-- [Functions](#provided-server-side-async-functions)
+- [Serverless Functions](#serverless-functions)
 - [Usage](#usage)
-  - [NextJs App Router](#nextjs-app-router)
-  - [NextJs Pages Router](#nextjs-pages-router)
-  - [ExpresJs](#expressjs)
-  - [Context Usage](#user-context)
-- [Retrive client-side token](#provided-server-side-async-functions)
+  - [Next.js App Router](#nextjs-app-router)
+  - [Next.js Pages Router](#nextjs-pages-router)
+  - [ExpressJS](#expressjs)
+  - [User Context](#user-context)
 - [Types](#types)
 - [Contributing](#contributing)
+- [Versions](#versions)
 
 ## Features
 
-- **Universal Usage**: Supports NextJs (App and Pages router) and ExpressJs
-- **Universal Middleware**: Works with both Express and Next.js for user authentication.
-- **User Registration**: Securely register users with email verification.
-- **Login and Logout**: Authenticate users and manage sessions.
-- **Password Reset**: Allow users to reset their passwords via email.
-- **User Context**: Provides a way to manage user state in React applications.
-- **Built in route manager**: Provides route protection based on end user setup.
-- **Flexible Configuration**: Configure routes and authentication requirements using JSON files.
+- **Next.js and ExpressJS Support**: Flexible implementation for both Next.js and Express.
+- **Serverless Functions**: Offers direct, serverless function exports for endpoints.
+- **User Registration & Login**: Supports secure user authentication.
+- **Email Verification & Password Reset**: Helps users verify their email and reset passwords.
+- **User Context Management**: Provides user state handling via React Context.
+- **Configurable Routes**: Route protection managed through JSON files.
+- **Easy-to-Configure**: Use JSON to customize routes and authentication requirements.
 
 ## Installation
 
-To install the package, run:
+Install the package:
 
 ```bash
 npm install @tomkoooo/t-auth@latest
 ```
 
 ## Environment Variables
-This package requires certain environment variables to function correctly. Create a .env file in your project root and add the following variables:
+
+Add the following to your `.env` file:
 
 ```env
 JWT_SECRET=your_secret_key
 MONGO_URI=your_mongo_database_uri
+MONGO_DB_NAME=your_database_name
 SMTP_HOST=your_email_service
 SMTP_USER=your_email_username
 SMTP_PASS=your_email_password
 SMTP_PORT=your_smtp_port
-
+SMTP_SECURE=secure_setting_for_smtp
 ```
-Email service env variables is for:
-``` javascript 
+
+### Email Service Environment Variables
+
+Below are the required environment variables to configure the `nodemailer` email service transporter:
+
+```javascript
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
-  port: parseInt(process.env.SMTP_PORT || '587'),
-  secure: false, // true, if using port 465, false, if 587
+  port: Number(process.env.SMTP_PORT),
+  secure: process.env.SMTP_SECURE === 'true',
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
@@ -63,17 +71,23 @@ const transporter = nodemailer.createTransport({
 });
 ```
 
-## Settings
+---
 
-There is 3 settings file for the package:
-- [auth.options.json](#general-settings)
-- [auth.schema.json](#schema-settings)
-- [auth.routes.json](#router-settings)
+## Settings Files for the Package
 
-Neither of them is necessary there is provided default settings.
-***If you using them you need to create them on the root level of your project with the given name.***
+There are three optional settings files:
 
-### General Settings
+1. [***auth.options.json***](#general-settings-authoptionsjson)
+2. [***auth.schema.json***](#schema-settings-authschemajson)
+3. [***auth.routes.json***](#router-settings-authroutesjson)
+
+These files provide default settings but are not mandatory. If you choose to use them, create them at the root level of your project with these exact names.
+
+---
+
+### General Settings (`auth.options.json`)
+
+Example configuration:
 
 ```json
 {
@@ -85,16 +99,22 @@ Neither of them is necessary there is provided default settings.
   }
 }
 ```
-- ***VerificationRequired:*** 
-    - true | false for email verifaction, this will be checked on every route change, login. By default it is false, but every user will get a verificationCode in the db, and will have a verifcation false.
-- ***AuthMethod:*** 
-    - Email | Username | both for the user authentication base
-- ***EmailTemplate:*** 
-    - Email content for email verifcation/password reset as html, {{code}} is where the verification code will be placed
 
-### Schema Settings
+- **verificationRequired**: `true | false`  
+  Enables email verification, which is checked on every route change and login. Defaults to `false`. Note: Every user will have a `verificationCode` in the database with `verified: false` initially.
 
-Default schema used in 'users' collection:
+- **authMethod**: `Email | Username | both`  
+  Sets the base for user authentication.
+
+- **emailTemplate**:  
+  Defines the content for email verification/password reset emails. `{{code}}` is a placeholder for the verification code.
+
+---
+
+### Schema Settings (`auth.schema.json`)
+
+The default schema used in the `users` collection is as follows:
+
 ```javascript
 const defaultUserSchema = {
   name: '',
@@ -110,273 +130,199 @@ const defaultUserSchema = {
 };
 ```
 
-- In the file you can expand this schema by adding additional jsons, the two file combined will add the schema for the collection
+To expand this schema, add additional JSON fields in `auth.schema.json`, which will be combined with the default schema for the collection.
 
-### Router settings
-You can create public/private routes in a json file by implamenting this structure:
+```javascript
+const optionsPath = path.resolve(process.cwd(), 'auth.schema.json');
+const options = fs.readFileSync(optionsPath, 'utf-8');
+const userSchemaOptions = {...defaultUserSchema, ...JSON.parse(options).userSchema}
+```
+
+---
+
+### Router Settings (`auth.routes.json`)
+
+You can create public and private routes in JSON by following this structure:
 
 ```json
- {
-    "routes": {
-        "[route]": {
-            "type": "[publicity]",
-            "credentials": "[arethemtics as string]",
-            "redirectTo": "[redirect route if credentials returns as false]"
-        }
+{
+  "routes": {
+    "[route]": {
+      "type": "[publicity]",
+      "credentials": "[arithmetic condition as string]",
+      "redirectTo": "[redirect route if credentials return false]"
     }
+  }
 }
 ```
 
-You can define specific routes in the routes configuration object, specifying which routes are public and which require authentication. Each route has a type and an optional credentials condition.
+By default, if no `auth.routes.json` file provided every route will be public
 
-- **Public vs Private Routes:**
+- **Public vs Private Routes**:  
+  - For public routes (`type: 'public'`), any user can access without authentication.
+  - For private routes (`type: 'private'`), access requires authentication or specific conditions.
 
-    - If a route is set to public (e.g., type: 'public'), the middleware allows any user to access it without authentication.
-    - If a route is set to private (e.g., type: 'private'), only users who meet certain criteria can access it.
-- **Setting Access Credentials:**
+- **Setting Access Credentials**:  
+  - Define access for private routes using `credentials`. For instance, setting `credentials: "user"` only allows authenticated users.
+  - For more specific access, such as an `/admin` route, use `credentials: "user.role === 'admin'"`.
 
-    - For private routes, use credentials to define the condition for access. The middleware checks this condition before allowing access.
-    - For example, on the route /settings, you may want only logged-in users to have access. Set credentials to user, so the middleware only allows users who are authenticated.
-    - For more specific access, such as an /admin route only accessible to admin users, you can set credentials to a condition like user.role === 'admin'. Only users who satisfy this condition will be allowed through.
-- **Redirect Behavior:**
+- **Redirect Behavior**:  
+  - If a user fails to meet access criteria for a private route, they will be redirected to a default route or a `redirectTo` route, if specified. This ensures secure access control across the application.
 
-    - If a user tries to access a private route but doesn’t meet the credentials, they’ll be redirected to a default route, or if specified, a redirectTo route for that particular route.
-This setup provides flexible control over route access based on user status and roles, making it easier to enforce security and access levels across your app.
+--- 
 
-# Authentication Process:
-
-This package uses ***JWT (JSON Web Tokens)*** to authenticate users. When a user logs in, the JWT is generated and paired with their IP address to create a unique hash. This process provides an added layer of security by linking the token to both the user and their device.
-
-- **How it works:**
-
-    - ***On login***, the (loginUser) function generates a JWT that includes the user’s ID (user._id) and is signed with the JWT_SECRET. However, the JWT itself ***does not*** include the user’s IP.
-    - The token is stored in the database along with a hash of the token and the user's ***IP address.***
-    - ***When the user makes a request*** with the JWT, both the ***middleware*** and the getUser() function will:
-        - Extract the user’s current IP address.
-        - Hash the IP address together with the JWT.
-        - Compare this hashed combination with the stored hash in the database.
-    - This ensures that only the user’s original device (with the correct IP) can access the account, preventing client-side attacks such as token theft.
-
-- **Security Benefits:**
-
-    - Even if the JWT is stolen (e.g., through a man-in-the-middle attack), the attacker will not be able to use it because the middleware will check the ***IP hash*** stored in the database and compare it with the IP of the device making the request.
-    - This effectively prevents unauthorized access from different devices or IP addresses, making the application more secure.
-
-- **Limitation:**
-
-    - ***Single-device login:*** Since the token is tied to a specific IP, the user cannot log in from multiple devices at the same time. If they try to log in from another device, it will fail because the IP hash will not match.
-In summary, this authentication approach ensures high security by preventing token theft attacks and pairing each token with the user’s IP. However, it also restricts the ability to log in from multiple devices simultaneously.
+This setup allows flexible control over route access, enabling you to enforce different access levels for users based on roles and authentication status.
 
 
-## Provided Server-Side Async Functions
+## Authentication Process
 
-The package includes pre-written, server-side async functions for various authentication tasks:
+JWTs are paired with IP addresses for secure user authentication. This approach limits token use to a single device and prevents token theft across IPs.
 
-##### - getUser(token)
+### Serverless Functions
 
- - **Parameter:** token - client-side stored JWT (valid for 24 hours).
- - **Returns:** The user object.
+This package exports the following asynchronous serverless functions:
+(Marked as 'use server')
 
-##### - loginUser(identifier, password)
+#### Database Connection
+- **connectToDatabase()** - Establishes a connection to MongoDB.
 
- + **Parameters:**
-    + ***identifier*** - either email or username.
-    + ***password*** - unhashed password.
- - **Returns:** The user object and the  ***token*** needed for further authentication.
- (Store in cookies, localStorage etc.)
+#### Utility Functions
+- **generateToken(userId, clientIp)** - Creates a JWT based on user ID and client IP.
+- **validateToken(token, clientIp?)** - Validates a JWT with IP that are either provided or not. The functions call a `getClientIp()` function to get the ip for the pairing
 
-##### - registerUser(email, password)
+#### Email Options
+- **emailOptions()** - Returns email HTML template and subject from `auth.options.json`.
+- **authOptions()** - Returns general auth configuration from `auth.options.json`.
+- **userSchemaOptions()** - Returns user schema from `auth.schema.json`.
+- **routesOptions()** - Returns route configuration from `auth.routes.json`.
 
- - **Parameters:**
-    - ***email*** - user’s email.
-    - ***password*** - unhashed password.
- - **Returns:** { newUser: <user object> | null, success: true | false, message: <status message> }
- - **Message Options:**
-    - "Registration successful. Please verify your email if required.
-    - Registration successful" if no email verification is needed.
+#### Verification Code
+- **generateVerificationCode(userId, verificationMethod)** - Generates a verification code for a specified method. (verification, reset) Returns the token for the databse, hashed client ip and the hashed user id.
 
-##### - logout(email)
+#### Email Service
+- **sendMail(to, subject, html?, text?)** - Sends an email.
+- **sendVerificationEmail(to, code)** - Sends an email with a verification code.
 
-- **Paramater:** email - the user's email.
-- **Returns:** { success: true | false, message: 'The user logged out.' }
+#### Authentication Functions
+- **registerUser(email, password)** - Registers a user. Returns `{success, user, token, message}` the token is needed for the `getUser()` function and it needs to be sotred in the cookies.
+- **loginUser(identifier, password)** - Authenticates a user. Returns `{success, user, token, message}` the token is needed for the `getUser()` function and it needs to be sotred in the cookies.
+- **getUser(token, ip?)** - Fetches user details with the [authentication](#authentication-process) process.
 
-##### - requestPasswordReset(email)
+#### Verification Functions
+- **verifyEmail(token, verificationCode)** - Verifies an email using a token and code.
+- **resetPassword(email, resetCode, newPassword)** - Resets the user password.
+- **requestPasswordReset(email)** - Initiates a password reset.
+- **resendVerificationEmail(email)** - Resends the verification email.
 
-- **Parameter:** email - the user’s email.
-- **Returns:** { success: true | false, message: 'An email with a reset code (stored in the database) is sent to the user.' }
+## Usage
 
+***By default the [authentication method](#serverless-functions) is **NOT** storing the token in the cookies [but gives it back as token](#authentication-functions). For the middlewere to work you **NEED** to sore the token in the cookies!***
 
-##### - verifyEmail(email, verificationCode)
+### Next.js App Router
 
-- **Parameters:**
-    - ***email*** - user’s email.
-    - ***verificationCode*** - code provided to the user via email.
-- **Returns:** { success: true | false, message: '' }
+In Next.js App Router (v13+), create `_middleware.ts` to use the middleware.
 
+#### Setup Middleware
 
-##### - resetPassword(email, resetCode, newPassword)
-
-- **Parameters:**
-    - ***email*** - user’s email.
-    - ***resetCode*** - code provided to the user via email.
-    - ***newPassword*** - unhashed password.
-- **Returns:** { success: true | false, message: '' }
-
-##### - sendVerificationEmail(email, verificationCode)
-
-- **Parameters:**
-    - ***email*** - user’s email.
-    - ***verificationCode*** - user’s verification code as stored in the database (user.codes.verification).
-- **Returns:** { success: true | false, message: '' }
-
-#####  Error Handling
- - All functions can throw errors that include an error message.
-
-###### Note: The provided API endpoints are configured to run the corresponding pre-written functions automatically, and waits the paramaters in the request body. (App router req.json, Pages router/ExpressJs req.body). The API functions will have the function name + [router type] + Route (example: requestPasswordResetAppRoute, requestPasswordResetPagesRoute)
-
-
-# Usage
-
-#### NextJs App Router
-To use the authentication features in Next.js, some manual setup is required.
-First we need to setup our middlewere that will run the pre-written middlewere
-
-- In the app directory create the _middlewere.ts file with this conetnt:
 ```javascript
 // /app/_middleware.ts
-import { universalAuthMiddleware } from '@tomkoooo/t-auth';  // Import from the package
+import { appRouterMiddleware } from '@tomkoooo/t-auth';
 import { NextResponse } from 'next/server';
 
-export async function middleware(req: Request) {
-  // Call the universal auth middleware
-  const res = NextResponse.next();
-  await universalAuthMiddleware(req, res);
-  return res;
+export async function middleware(req) {
+  return appRouterMiddleware(req, NextResponse.next());
 }
-
 ```
 
-##### pre-built API
-To use these pre-written API endpoint functions we need to create the corresponding API endpoint in our API folder then import the function.
+#### Pre-Built API Endpoints
 
-On the request you need to provide the [function](#provided-server-side-async-functions) paramater. Read the [note](#note-the-provided-api-endpoints-are-configured-to-run-the-corresponding-pre-written-functions-automatically-and-waits-the-paramaters-in-the-request-body-app-router-reqjson-pages-routerexpressjs-reqbody-the-api-functions-will-have-the-function-name--router-type--route-example-requestpasswordresetapproute-requestpasswordresetpagesroute) for the functions as API usage.
-
-
-for example here is the request password reset endpoint:
+You may define custom API endpoints for each serverless function. For example:
 
 ```javascript
-// app/api/auth/forgot-password/route.ts
-import { requestResetPasswordAppRoute } from '@tomkoooo/t-auth';
+// /app/api/auth/forgot-password/route.ts
+import { requestPasswordReset } from '@tomkoooo/t-auth';
 
 export async function POST(req) {
-  return requestPasswordResetAppRoute(req);
+  return requestPasswordReset(req);
 }
-
 ```
 
-#### NextJs Pages Router
-To use the authentication features in Next.js, some manual setup is required.
-First we need to setup our middlewere that will run the pre-written middlewere
+### Next.js Pages Router
 
-- In the pages directory create the _middlewere.ts file with this content:
+Similarly, set up the middleware in the Pages Router:
+
 ```javascript
 // /pages/_middleware.ts
-import { universalAuthMiddleware } from '@tomkoooo/t-auth';  // Import from node_modules
+import { pagesRouterMiddleware } from '@tomkoooo/t-auth';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 export async function middleware(req: NextApiRequest, res: NextApiResponse) {
-  // Call the universal auth middleware
-  await universalAuthMiddleware(req, res, () => {
-    // After authentication, the request proceeds here
-    res.status(200).send('Protected content');
-  });
+  await pagesRouterMiddleware(req, res);
 }
-
 ```
-##### pre-built API
-To use these pre-written API endpoint functions we need to create the corresponding API endpoint in our API folder then import the function.
 
-On the request you need to provide the [function](#provided-server-side-async-functions) paramater. Read the [note](#note-the-provided-api-endpoints-are-configured-to-run-the-corresponding-pre-written-functions-automatically-and-waits-the-paramaters-in-the-request-body-app-router-reqjson-pages-routerexpressjs-reqbody-the-api-functions-will-have-the-function-name--router-type--route-example-requestpasswordresetapproute-requestpasswordresetpagesroute) for the functions as API usage.
-
-For example here is the request password reset endpoint:
+Define endpoints in `/pages/api/`. Example:
 
 ```javascript
-// pages/api/auth/forgot-password.ts (or .js)
-import { requestResetPasswordPagesRoute } from '@tomkoooo/t-auth'; // Importing the handler
+// /pages/api/auth/forgot-password.js
+import { requestPasswordReset } from '@tomkoooo/t-auth';
 
 export default async function POST(req, res) {
-  return requestResetPasswordPagesRoute(req, res); // Call the handler
+  return requestPasswordReset(req, res);
 }
-
 ```
 
-## ExpressJS
+### ExpressJS
 
-For expressJs there is a provided server with the middlewere and with all the routes that are listed in the NextJs setup.
-All you need to do is to use the pre-written server in your express server
+To use the package in Express, add the middleware:
+
+```javascript
+// Express Server Setup
+import express from 'express';
+import { expressMiddlewere } from '@tomkoooo/t-auth';
+
+const app = express();
+
+expressMiddlewere(app);
+
+//or app.use(expressMiddlewere)
+
+app.listen(3000, () => {
+  console.log('Server running on port 3000');
+});
+```
+
+Or use the pre-configured server with routes:
+
 ```javascript
 import { createServer } from '@tomkoooo/t-auth';
 
 const app = createServer();
 
-// Optionally, the user can mount custom routes (if needed)
 app.listen(3000, () => {
-  console.log('User app running with authentication server on port 3000');
+  console.log('Authentication server running on port 3000');
 });
 ```
 
-If you dont want to use the pre-build server you can also import the universalAuthMiddlewere to any express server 
-``` javascript 
-// Apply the universal auth middleware globally to all routes by default
-  app.use(universalAuthMiddleware); // This will apply the auth logic for every incoming request
-```
-and also you can use the routes without the pre-build server by importing them as 'apiRoutes' wich you can mounth under any additional routes.
-```javascript 
- // Mount your API routes under '/api/auth'
-  app.use('/api/auth', apiRoutes);
-```
+It provides pre-configured API routes (at `api/auth/[login, register, forgot-password, etc..]`) and the middlewere implamentation. 
+For more information the routes listed in `./src/express/apiRoutes.ts`
 
-On the pre-build server they are nested under '/api/auth'.
+### User Context
 
-The apiRoutes structure like this:
-``` javascript 
-const router = express.Router();
+Wrap your Next.js or React app with `UserProvider` to manage user state.
 
-// POST login route
-router.post('/login', async (req: Request, res: Response) => {
-  try {
-    const { email, password } = req.body;
-    const { token, user } = await loginUser(email, password);
-    res.json({ token, user });
-  } catch (error: any) {
-    res.status(400).json({ message: error.message });
-  }
-});
+***By default the [authentication method](#serverless-functions) is **NOT** storing the token in the cookies [but gives it back as token](#authentication-functions). For the middlewere to work you **NEED** to sore the token in the cookies!***
 
-export default router;
-```
-
-### User Context
-By default the context does not include any data for the user, but it gives the ability to set the user object. By this approach is easier to implament into any rendering, and framework.
-
-#### App router
-In NextJs >13 app router projects get the user object on the root layout.tsx file and wrap your application with the provider.
+#### Example in Next.js App Router
 
 ```javascript
-// app/layout.tsx
+// /app/layout.tsx
 import { UserProvider, getUser } from '@tomkoooo/t-auth';
 import { cookies } from 'next/headers';
-import { ReactNode } from 'react';
 
-export default async function Layout({ children }: { children: ReactNode }) {
-  // Fetch token from cookies (server-side safe)
+export default async function Layout({ children }) {
   const token = cookies().get('token')?.value;
-  let user = null;
-
-  if (token) {
-    // Fetch user using the token
-    user = await getUser(token);
-  }
+  const user = token ? await getUser(token) : null;
 
   return (
     <UserProvider user={user}>
@@ -384,53 +330,9 @@ export default async function Layout({ children }: { children: ReactNode }) {
     </UserProvider>
   );
 }
-
 ```
 
-#### Pages Router
-In pages router you can use getInitialProps or getServerSideProps in your files. 
-Here is an example on the root _app.tsx file:
-```javascript
-// pages/_app.tsx
-import { UserProvider, getUser } from '@tomkoooo/t-auth';
-import App from 'next/app';
-import { cookies } from 'next/headers';
-
-function MyApp({ Component, pageProps, user }) {
-  return (
-    <UserProvider user={user}>
-      <Component {...pageProps} />
-    </UserProvider>
-  );
-}
-
-// Use getInitialProps to fetch user data on the server side
-MyApp.getInitialProps = async (appContext) => {
-  const appProps = await App.getInitialProps(appContext);
-
-  // Get token from cookies (SSR-safe)
-  const cookieHeader = appContext.ctx.req?.headers.cookie;
-  let user = null;
-
-  if (cookieHeader) {
-    const token = cookies().get('token')?.value;
-    if (token) {
-      user = await getUser(token);
-    }
-  }
-
-  return { ...appProps, user };
-};
-
-export default MyApp;
-```
-
-#### Client side fetching
-You can fetch the user object by calling an API and then setting the context's user's value to the response.
-
-This makes possible to be able to use it plain React as well and this is why this provided code is in vanilla js and ts.
-
-If youe're using [ExpressJs](#expressjs) with the pre-build server you don't need to setup any API routes but on NextJs you have to create manually the API endpoints structure and write your own mechanism or use the [pre-built](#pre-built-api) API-s or the [server-side](#user-context) functions
+#### Example in React
 
 ```javascript
 // src/App.js
@@ -493,29 +395,25 @@ function App() {
 }
 
 export default App;
-
 ```
-#### Using User Context
-You can access user data anywhere in your components:
+
+Wrap your app:
 
 ```javascript
-import { useUser } from '@tomkoooo/t-auth';
-
-const MyComponent = () => {
-  const { user, loading } = useUser();
-
-  if (loading) return <p>Loading...</p>;
-
-  return <div>{user ? `Welcome, ${user.name}` : 'Please log in.'}</div>;
-};
+<UserProvider>
+  <AppContent />
+</UserProvider>
 ```
 
-# Types
+## Types
+
 You can access the user's type wich will match your additional schema settings with the default one.
-``` javascript
+
+```javascript
 import {User} from '@tomkoooo/t-auth'
 ```
 
-# Contributing
-Contributions are welcome! Please open an issue or a pull request.
-[Github/Tomkoooo](https://github.com/Tomkoooo/tauth)
+## Contributing
+
+Please submit issues or feature requests for improvements.
+[githib.com/Tomkoooo/tauth](#https://github.com/Tomkoooo/tauth)

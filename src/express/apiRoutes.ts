@@ -1,6 +1,10 @@
 import express, { Request, Response } from 'express';
-import { loginUser, getUser, registerUser, resetPassword, requestPasswordReset } from '../../auth';
-import { connectToDatabase } from '../../db/mongodb';
+import { loginUser } from '../auth/login';
+import { getUser } from '../auth/getUser';
+import { registerUser } from '../auth/register';
+import { requestPasswordReset } from '../auth/verification';
+import { resetPassword } from '../auth/verification';
+import { connectToDatabase } from '../db/mongodb';
 
 const router = express.Router();
 
